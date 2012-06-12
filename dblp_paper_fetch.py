@@ -33,13 +33,14 @@ index = 0
 
 contents = fetcher.fetch_webpage(url)
 paper_links = re.findall('<br><a href="(.*?)"><img alt="Electronic Edition"', contents)
-paper_names = re.findall('<b>(.*?)\.', contents)
-#print paper_links
-#print paper_names
+paper_names = re.findall('<b>(.*?)[\.|\?]', contents)
 
-for paper_link in paper_links :
-    real_path = re.findall('<a href="(.*?)"', fetcher.fetch_webpage(paper_link))
-    paper_file = open(paper_names[index]+'.pdf', 'w')
-    paper_file.write(fetcher.fetch_webpage(real_path[0]))
-    paper_file.close()
-    index = index + 1
+if len(paper_names) != len(paper_links):
+    print "fetch paper names & links error!"
+else:
+    for paper_link in paper_links :
+        real_path = re.findall('<a href="(.*?)"', fetcher.fetch_webpage(paper_link))
+        paper_file = open(paper_names[index]+'.pdf', 'w')
+        paper_file.write(fetcher.fetch_webpage(real_path[0]))
+        paper_file.close()
+        index = index + 1
