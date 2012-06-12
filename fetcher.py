@@ -15,31 +15,23 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-"""fetch dblp papers of a proceeding in batches.
+"""fetch a web page.
 
 """
 import sys
 import httplib
 import re
-import fetcher
 
-#url -- proceeding page url
-url = "http://dblp.uni-trier.de/db/conf/acl/acl2011.html"
+def fetch_webpage(url) :
+    try:
+        host = url.replace("http://", "", 1)
+        url_parts = host.split('/');
+        path = host.replace(url_parts[0], "", 1)
+        host = url_parts[0];
 
-if (len(sys.argv) > 1):
-    url = sys.argv[1]
-
-index = 0
-
-contents = fetcher.fetch_webpage(url)
-paper_links = re.findall('<br><a href="(.*?)"><img alt="Electronic Edition"', contents)
-paper_names = re.findall('<b>(.*?)\.', contents)
-#print paper_links
-#print paper_names
-
-for paper_link in paper_links :
-    real_path = re.findall('<a href="(.*?)"', fetcher.fetch_webpage(paper_link))
-    paper_file = open(paper_names[index]+'.pdf', 'w')
-    paper_file.write(fetcher.fetch_webpage(real_path[0]))
-    paper_file.close()
-    index = index + 1
+        conn = httplib.HTTPConnection(host)
+        req = conn.request("GET", path)
+        res = conn.getresponse()
+    except:
+        return fetch_webpage(url)
+    return res.read()

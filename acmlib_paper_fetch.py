@@ -21,7 +21,10 @@
 import sys
 import httplib
 import re
+import fetcher
 
+#pNo -- PROC_ID
+#size -- PAPER_NUM
 pNo = 0
 size = 2
 
@@ -31,37 +34,22 @@ if (len(sys.argv) > 1):
 if (len(sys.argv) > 2):
     size = int(sys.argv[2])
 
-host_s = "acm.lib.tsinghua.edu.cn"
-mpath_s = "/acm/Detail-List.nsp?&view=ACM&cid_PCODE=&cid_DOCTYPE=&cid_HASABSTRACT=&cid_HASFULLTEXT=&lastquery=(pNo):PROC_ID&sortfield=SECTION_SEQ_NO,SEQ_NO,PUBDATE&sortorder=ASCENDING,ASCENDING,ASCENDING&var_AUTHCODE=&var_PUBCODE=&var_BROWSECODE=&var_SOURCECODE=&recid=&reccode=&mailto=&docindex=iNo&var_SECTION=&numresults=25&fromrecord=&usertag="
+detail_list_url = "http://acm.lib.tsinghua.edu.cn/acm/Detail-List.nsp?&view=ACM&cid_PCODE=&cid_DOCTYPE=&cid_HASABSTRACT=&cid_HASFULLTEXT=&lastquery=(pNo):PROC_ID&sortfield=SECTION_SEQ_NO,SEQ_NO,PUBDATE&sortorder=ASCENDING,ASCENDING,ASCENDING&var_AUTHCODE=&var_PUBCODE=&var_BROWSECODE=&var_SOURCECODE=&recid=&reccode=&mailto=&docindex=iNo&var_SECTION=&numresults=25&fromrecord=&usertag="
 
-host_d = "166.111.120.94"
-mpath_d = "/acm/ContentLoader.nsp?view=path"
-mpath_f = "/acm/path"
+content_url = "http://166.111.120.94/acm/ContentLoader.nsp?view=path"
+file_url = "http://166.111.120.94/acm/path"
 
-conn_s = httplib.HTTPConnection(host_s)
-mpath_s = mpath_s.replace("pNo", pNo, 1)
-
-conn_d = httplib.HTTPConnection(host_d)
+detail_list_url = detail_list_url.replace("pNo", pNo, 1)
 
 for i in range(0, size) :
-    #print mpath_s.replace("iNo", str(i), 1)
-    req_s = conn_s.request("GET", mpath_s.replace("iNo", str(i), 1))
-    res_s = conn_s.getresponse()
-    #print res_s.read()
-    #
-    ## find paper name & link & save file
-    contents_s = res_s.read()
-    paper_name = re.findall('<b><img src="img/spacer.gif"><br>(.*?)</b>', contents_s);
+    contents = fetcher.fetch_webpage(detail_list_url.replace("iNo", str(i), 1))
+
+    paper_name = re.findall('<b><img src="img/spacer.gif"><br>(.*?)</b>', contents);
     #print paper_name
-    paper_path = re.findall('fl = "(.*?)"', contents_s)
+    paper_path = re.findall('fl = "(.*?)"', contents)
     #print paper_path
-    req_d = conn_d.request("GET", mpath_d.replace("path", paper_path[0], 1))
-    res_d = conn_d.getresponse()
-    contents_d = res_d.read()
-    real_path = re.findall('top.location.replace\("(.*?)"', contents_d)
+    real_path = re.findall('top.location.replace\("(.*?)"', fetcher.fetch_webpage(content_url.replace("path", paper_path[0], 1)))
     #print real_path
-    req_f = conn_d.request("GET", mpath_f.replace("path", real_path[0], 1))
-    res_f = conn_d.getresponse()
     paper_file = open(paper_name[0]+'.pdf', 'w')
-    paper_file.write(res_f.read())
+    paper_file.write(fetcher.fetch_webpage(file_url.replace("path", real_path[0], 1)))
     paper_file.close()
