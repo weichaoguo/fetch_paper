@@ -39,11 +39,15 @@ if len(paper_names) != len(paper_links):
     print "fetch paper names & links error!"
 else:
     for paper_link in paper_links :
-        real_path = re.findall('<a href="(.*?)"', fetcher.fetch_webpage(paper_link))
-        if len(real_path) == 0 :
-            index = index + 1
-            continue
+        if paper_link.endswith(".pdf") :
+            d_link = paper_link
+        else :
+            real_path = re.findall('<a href="(.*?)"', fetcher.fetch_webpage(paper_link))
+            if len(real_path) == 0 :
+                index = index + 1
+                continue
+            d_link = real_path[0]
         paper_file = open(paper_names[index].replace("/", " ")+'.pdf', 'w')
-        paper_file.write(fetcher.fetch_webpage(real_path[0]))
+        paper_file.write(fetcher.fetch_webpage(d_link))
         paper_file.close()
         index = index + 1
