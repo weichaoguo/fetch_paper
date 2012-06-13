@@ -40,7 +40,10 @@ if len(paper_names) != len(paper_links):
 else:
     for paper_link in paper_links :
         real_path = re.findall('<a href="(.*?)"', fetcher.fetch_webpage(paper_link))
-        paper_file = open(paper_names[index]+'.pdf', 'w')
+        if len(real_path) == 0 :
+            index = index + 1
+            continue
+        paper_file = open(paper_names[index].replace("/", " ")+'.pdf', 'w')
         paper_file.write(fetcher.fetch_webpage(real_path[0]))
         paper_file.close()
         index = index + 1

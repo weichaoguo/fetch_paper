@@ -47,9 +47,19 @@ for i in range(0, size) :
     paper_name = re.findall('<b><img src="img/spacer.gif"><br>(.*?)</b>', contents);
     #print paper_name
     paper_path = re.findall('fl = "(.*?)"', contents)
-    #print paper_path
+    p_len = len(paper_path)
+    index = 0
+    while index < p_len:
+        if not paper_path[index].endswith(".pdf") :
+            del paper_path[index]
+            p_len = p_len - 1
+        else :
+            index = index + 1
+    if len(paper_path) == 0 :
+        continue
     real_path = re.findall('top.location.replace\("(.*?)"', fetcher.fetch_webpage(content_url.replace("path", paper_path[0], 1)))
-    #print real_path
-    paper_file = open(paper_name[0]+'.pdf', 'w')
+    if len(real_path) == 0 :
+        continue
+    paper_file = open(paper_name[0].replace("/", " ")+'.pdf', 'w')
     paper_file.write(fetcher.fetch_webpage(file_url.replace("path", real_path[0], 1)))
     paper_file.close()
